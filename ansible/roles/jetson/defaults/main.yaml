@@ -2,6 +2,6 @@
 ubuntu_release: bionic
 
 new_user:
-  name: pythops
+  name: mdt
   shell: /bin/bash
-  password: pythops
+  password: meditech2020
