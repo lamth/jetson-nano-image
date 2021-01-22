@@ -1,0 +1,114 @@
+---
+- name: Update sources.list
+  template:
+    src: etc/apt/sources.list
+    dest: /etc/apt/sources.list
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Upgrade packages
+  apt:
+    upgrade: dist
+    update_cache: yes
+
+- name: Install packages
+  apt:
+    name: "{{ item }}"
+  loop:
+    - bash-completion
+    - build-essential
+    - btrfs-tools
+    - cmake
+    - curl
+    - dnsutils
+    - htop
+    - iotop
+    - isc-dhcp-client
+    - iputils-ping
+    - kmod
+    - linux-firmware
+    - locales
+    - ifupdown
+    - net-tools
+    - pciutils
+    - python3-dev
+    - ssh
+    - sudo
+    - systemd
+    - udev
+    - unzip
+    - usbutils
+    - vim
+    - wpasupplicant
+    - python3-pip
+
+- name: Remove the netplan package
+  package:
+    name: netplan.io
+    state: absent
+
+- name: Generate locales
+  locale_gen:
+    name: en_US.UTF-8
+    state: present
+
+- name: Enable services
+  shell: systemctl enable {{ item }}
+  loop:
+    - ssh
+    - networking  
+    - systemd-networkd
+    - systemd-resolved
+
+# - name: Create network conf
+#   template:
+#     src: etc/netplan/netcfg.yaml
+#     dest: /etc/netplan/netcfg.yaml
+#     owner: root
+#     group: root
+#     mode: 0644
+
+- name: Create new user
+  user:
+    name: "{{ new_user.name }}"
+    shell: "{{ new_user.shell }}"
+    password: "{{ new_user.password | password_hash('sha512') }}"
+    create_home: yes
+    groups: sudo
+    state: present
+
+- name: Download pip
+  get_url:
+    url: https://bootstrap.pypa.io/get-pip.py
+    dest: /tmp/get-pip.py
+
+- name: Install pip
+  shell: python3 /tmp/get-pip.py --user
+  become: yes
+  become_user: "{{ new_user.name }}"
+
+# - name: Install Docker Module for Python
+#   pip:
+#     name: docker-py
+
+
+# - name: Log into private registry and force re-authorization
+#   docker_login:
+#     registry: hub.iview.vn
+#     username: admin
+#     password: meditech2020
+#     reauthorize: yes
+
+# - name: pull ds base image
+#   docker_image:
+#     name: hub.iview.vn/ds-aiview:0.1-base
+
+
+# - name: Log out of DockerHub
+#   docker_login:
+#     state: absent
+
+  
+# - name: INSTALL env 
+#   shell: curl -s -L https://raw.githubusercontent.com/hungnt1/jetson-nano-image/master/install-env.sh | bash

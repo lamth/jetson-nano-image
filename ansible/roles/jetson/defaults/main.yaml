@@ -1,0 +1,7 @@
+---
+ubuntu_release: bionic
+
+new_user:
+  name: mdt
+  shell: /bin/bash
+  password: meditech2020
